@@ -1,0 +1,124 @@
+﻿@using CodliDevelopment;
+@model DailyRandom.Models.IndexViewModel;
+@{ Model.Initialize(); }
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.css" />
+
+<h5>Wyniki losowania na dzień: <strong class="fill-today-date">@TimeX.DateToSmartString(DateTime.Now) (@Model.DayOfWeekPolish(DateTime.Now.DayOfWeek))</strong></h5>
+<ol id="today-results">
+    @for (var i = 0; i < Model.todayOrder.Count; i++)
+    {
+        if (i == 0)
+        {
+            <li style="color:darkgoldenrod;"><strong>@Model.todayOrder.ElementAt(i).fullName</strong></li>
+            continue;
+        }
+
+        if (i == Model.todayOrder.Count - 1)
+        {
+            <li style="color:darkred;"><strong>@Model.todayOrder.ElementAt(i).fullName</strong></li>
+            continue;
+        }
+
+        <li>@Model.todayOrder.ElementAt(i).fullName</li>
+    }
+</ol>
+
+<div>
+    Przedni fotel pasażera należy do osoby która została wylosowana jako pierwsza (najmniejsza liczba), zaś na środku siada osoba która trafiła ostatnią pozycję (największa liczba).
+    W przypadku nieobecności osoby wylosowanej, hierarchia automatycznie przesuwa się o jeden - losowanie nie jest powtarzane.
+</div>
+
+<div class="codli-section-separator"></div>
+<h5>Przewidywanie następnego losowania na zwycięzcę</h5>
+<ol id="predicted-winner">
+    @{ var tomorowPredict = Model.PredictNextWinner(); }
+    @for (var i = 0; i < tomorowPredict.Count; i++)
+    {
+        if (i == 0)
+        {
+            <li style="color:darkgoldenrod;"><strong>@tomorowPredict.ElementAt(i).Key.fullName - @tomorowPredict.ElementAt(i).Value%</strong></li>
+            continue;
+        }
+
+        if (i == tomorowPredict.Count - 1)
+        {
+            <li style="color:darkred;"><strong>@tomorowPredict.ElementAt(i).Key.fullName - @tomorowPredict.ElementAt(i).Value%</strong></li>
+            continue;
+        }
+
+        <li>@tomorowPredict.ElementAt(i).Key.fullName - @tomorowPredict.ElementAt(i).Value%</li>
+    }
+</ol>
+
+<div class="codli-section-separator"></div>
+
+<div class="codli-flex">
+    <div class="flex-content">
+        <h5 style="text-align: center; width: 100%;">Procent zwycięstw: </h5>
+        <ol id="win-procentage">
+            @{ var winsPercent = Model.ProcentageOfWin; }
+            @for (var i = 0; i < winsPercent.Count; i++)
+            {
+                if (i == 0)
+                {
+                    <li style="color:darkgoldenrod;"><strong>@winsPercent.ElementAt(i).Key.fullName - @winsPercent.ElementAt(i).Value%</strong></li>
+                    continue;
+                }
+
+                if (i == tomorowPredict.Count - 1)
+                {
+                    <li style="color:darkred;"><strong>@winsPercent.ElementAt(i).Key.fullName - @winsPercent.ElementAt(i).Value%</strong></li>
+                    continue;
+                }
+
+                <li>@winsPercent.ElementAt(i).Key.fullName - @winsPercent.ElementAt(i).Value%</li>
+            }
+        </ol>
+    </div>
+
+    <div class="flex-content">
+        <h5 style="text-align: center; width: 100%;">Procent porażek</h5>
+        <ol id="lose-procentage">
+            @{ var losesPercent = Model.ProcentageOfLose; }
+            @for (var i = 0; i < losesPercent.Count; i++)
+            {
+                if (i == 0)
+                {
+                    <li style="color:darkred;"><strong>@losesPercent.ElementAt(i).Key.fullName - @losesPercent.ElementAt(i).Value%</strong></li>
+                    continue;
+                }
+
+                if (i == tomorowPredict.Count - 1)
+                {
+                    <li style="color:darkgoldenrod;"><strong>@losesPercent.ElementAt(i).Key.fullName - @losesPercent.ElementAt(i).Value%</strong></li>
+                    continue;
+                }
+
+                <li>@losesPercent.ElementAt(i).Key.fullName - @losesPercent.ElementAt(i).Value%</li>
+            }
+        </ol>
+    </div>
+</div>
+
+<div class="codli-section-separator"></div>
+
+<h5 style="text-align: center; width: 100%;">Zwycięzcy według dnia tygodnia:</h5>
+<br />
+<div class="codli-flex">
+    @for (var i = 0; i < 7; i++)
+    {
+        var dayOfWeekName = Model.DayOfWeekPolish(i);
+        var winnersOf = Model.PercentageOf(Model.WinnersOfDayOfWeek(i));
+        <div class="flex-content">
+            <h6 style="text-align: center; width: 100%;">@dayOfWeekName</h6>
+            <ol>
+                @foreach (var e in winnersOf)
+                {
+                    <li>@e.Key.fullName - @e.Value%</li>
+                }
+            </ol>
+        </div>
+    }
+</div>
